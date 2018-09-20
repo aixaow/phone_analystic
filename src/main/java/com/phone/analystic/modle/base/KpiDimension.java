@@ -3,6 +3,7 @@ package com.phone.analystic.modle.base;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author axiao
@@ -12,9 +13,21 @@ import java.io.IOException;
 public class KpiDimension extends BaseDimension {
    private int id;
     /**
-     * kpi维度名称
+     * kpi（关键绩效指标）维度名称
      */
    private String kpiName;
+
+
+    public KpiDimension(){}
+
+    public KpiDimension(String kpiName) {
+        this.kpiName = kpiName;
+    }
+
+    public KpiDimension(int id, String kpiName) {
+        this.id = id;
+        this.kpiName = kpiName;
+    }
 
 
 
@@ -32,13 +45,34 @@ public class KpiDimension extends BaseDimension {
 
     @Override
     public int compareTo(BaseDimension o) {
-        return 0;
+        if(this == o){
+            return 0;
+        }
+
+        KpiDimension other = (KpiDimension) o;
+        int tmp = this.id - other.id;
+        if(tmp != 0){
+            return tmp;
+        }
+        return this.kpiName.compareTo(other.kpiName);
     }
 
     @Override
-    public String toString() {
-        return id + "\u0001"+kpiName;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        KpiDimension that = (KpiDimension) o;
+        return id == that.id &&
+                Objects.equals(kpiName, that.kpiName);
     }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, kpiName);
+    }
+
+
 
     public int getId() {
         return id;

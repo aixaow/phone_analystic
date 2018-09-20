@@ -3,6 +3,7 @@ package com.phone.analystic.modle.base;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author axiao
@@ -15,6 +16,17 @@ public class PlatformDimension extends BaseDimension {
      * 平台名称
      */
    private String platformName;
+
+    public PlatformDimension(){}
+
+    public PlatformDimension(String platformName) {
+        this.platformName = platformName;
+    }
+
+    public PlatformDimension(int id,String patformName) {
+        this.platformName = platformName;
+        this.id = id;
+    }
 
 
 
@@ -32,12 +44,35 @@ public class PlatformDimension extends BaseDimension {
 
     @Override
     public int compareTo(BaseDimension o) {
-        return 0;
+        if(this == o){
+            return 0;
+        }
+
+        PlatformDimension other = (PlatformDimension) o;
+        int tmp = this.id - other.id;
+        if(tmp != 0){
+            return tmp;
+        }
+        return this.platformName.compareTo(other.platformName);
     }
 
     @Override
-    public String toString() {
-        return id + "\u0001"+platformName;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PlatformDimension that = (PlatformDimension) o;
+        return id == that.id &&
+                Objects.equals(platformName, that.platformName);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, platformName);
     }
 
     public int getId() {

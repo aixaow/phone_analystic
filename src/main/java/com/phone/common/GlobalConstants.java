@@ -6,6 +6,28 @@ package com.phone.common;
  * @description: 除日志相关的常量
  */
 public class GlobalConstants {
-    //运行日期
+    /**
+     *  运行日期
+     */
     public static final String RUNNING_DATE = "running_date";
+
+    /**
+     * Java连接MySQL--jdbc的url
+     */
+    public static final String URL = "jdbc:mysql://hadoop01:3306/result";
+
+    /**
+     * 驱动类
+     */
+    public static final String DRIVER = "com.mysql.jdbc.Driver";
+
+    /**
+     * 数据库用户名
+     */
+    public static final String USER = "root";
+
+    /**
+     * 数据库用户密码
+     */
+    public static final String PASSWORD = "root";
 }
