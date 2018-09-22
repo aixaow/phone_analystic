@@ -1,5 +1,8 @@
 package com.phone.analystic.modle.base;
 
+import com.phone.common.GlobalConstants;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -27,6 +30,12 @@ public class PlatformDimension extends BaseDimension {
         this.platformName = platformName;
         this.id = id;
     }
+
+    public static PlatformDimension getInstance(String patformName){
+        String pl = StringUtils.isEmpty(patformName) ? GlobalConstants.DEFAULT_VALUE : patformName;
+        return new PlatformDimension(pl);
+    }
+
 
 
 
@@ -75,6 +84,7 @@ public class PlatformDimension extends BaseDimension {
         return Objects.hash(id, platformName);
     }
 
+
     public int getId() {
         return id;
     }
@@ -83,11 +93,11 @@ public class PlatformDimension extends BaseDimension {
         this.id = id;
     }
 
-    public String getKpiName() {
+    public String getPlatformName() {
         return platformName;
     }
 
-    public void setKpiName(String kpiName) {
-        this.platformName = kpiName;
+    public void setPlatformName(String platformName) {
+        this.platformName = platformName;
     }
 }

@@ -1,10 +1,12 @@
 package com.phone.analystic.mr.service.impl;
 
-import com.phone.analystic.modle.base.BaseDimension;
+import com.phone.Util.JdbcUtil;
+import com.phone.analystic.modle.base.*;
 import com.phone.analystic.mr.service.IDimension;
+import org.apache.hadoop.mapreduce.lib.db.DBOutputFormat;
 
 import java.io.IOException;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,7 +39,185 @@ public class IDimensionImpl implements IDimension {
      */
     @Override
     public int getDiemnsionIdByObject(BaseDimension dimension) throws IOException, SQLException {
-        return 0;
+        Connection conn = null;
+        try {
+            //构造cachekey
+            String cacheKey = buildCacheKey(dimension);
+            //查询缓存中是否存在
+            if(this.cache.containsKey(cacheKey)){
+                return this.cache.get(cacheKey);
+            }
+            //代码走到这儿
+            String sqls [] = null;
+            if(dimension instanceof KpiDimension){
+                sqls  = buildKpiSqls(dimension);
+            } else if(dimension instanceof PlatformDimension){
+                sqls = buildPlatformSqls(dimension);
+            } else if(dimension instanceof DateDimension){
+                sqls = buildDateSqls(dimension);
+            } else if(dimension instanceof BrowserDimension){
+                sqls = buildBrowserSqls(dimension);
+            }
+
+            //获取jdbc的连接
+            conn = JdbcUtil.getConn();
+            int id = -1;
+            synchronized (this){
+                //执行sql语句获取id
+                id = this.executSql(conn,sqls,dimension);
+            }
+            //将结果存储到cache中
+            this.cache.put(cacheKey,id);
+            return id;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtil.close(conn,null,null);
+        }
+        throw new RuntimeException("插入基础维度类异常.");
+    }
+
+
+    /**
+     * 构建kpi的插入和查询sql语句
+     * 注意顺序要一致，方便后面对sql语句进行操作
+     * @param dimension
+     * @return
+     */
+    private String[] buildKpiSqls(BaseDimension dimension) {
+        String insertSql = "insert into `dimension_kpi`(kpi_name) values(?)";
+        String selectSql = "select id from `dimension_kpi` where kpi_name = ?";
+        return new String[]{insertSql,selectSql};
+    }
+
+    private String[] buildPlatformSqls(BaseDimension dimension) {
+        String insertSql = "insert into `dimension_platform`(platform_name) values(?)";
+        String selectSql = "select id from `dimension_platform` where platform_name = ?";
+        return new String[]{insertSql,selectSql};
+    }
+
+    private String[] buildDateSqls(BaseDimension dimension) {
+        String insertSql = "INSERT INTO `dimension_date`(`year`, `season`, `month`, `week`, `day`, `type`, `calendar`) VALUES(?, ?, ?, ?, ?, ?, ?)";
+        String selectSql = "SELECT `id` FROM `dimension_date` WHERE `year` = ? AND `season` = ? AND `month` = ? AND `week` = ? AND `day` = ? AND `type` = ? AND `calendar` = ?";
+        return new String[]{insertSql,selectSql};
+    }
+
+    private String[] buildBrowserSqls(BaseDimension dimension) {
+        String insertSql = "INSERT INTO `dimension_browser`(`browser_name`, `browser_version`) VALUES(?,?)";
+        String selectSql = "SELECT `id` FROM `dimension_browser` WHERE `browser_name` = ? AND `browser_version` = ?";
+        return new String[]{insertSql,selectSql};
+    }
+
+    /**
+     * 构建维度key
+     * @param dimension
+     * @return
+     */
+    private String buildCacheKey(BaseDimension dimension) {
+        StringBuffer sb = new StringBuffer();
+        if(dimension instanceof BrowserDimension){
+            sb.append("browser_");
+            BrowserDimension browser = (BrowserDimension)dimension;
+            sb.append(browser.getBrowserName());
+            sb.append(browser.getBrowserVersion());
+            //browser_IE8.0
+        } else if(dimension instanceof KpiDimension){
+            sb.append("kpi_");
+            KpiDimension kpi = (KpiDimension)dimension;
+            sb.append(kpi.getKpiName());
+            //kpi_new_user
+        } else if(dimension instanceof DateDimension){
+            sb.append("date_");
+            DateDimension date = (DateDimension)dimension;
+            sb.append(date.getYear());
+            sb.append(date.getSeason());
+            sb.append(date.getMonth());
+            sb.append(date.getWeek());
+            sb.append(date.getDay());
+            sb.append(date.getType());
+        } else if(dimension instanceof PlatformDimension){
+            sb.append("platform_");
+            PlatformDimension platform = (PlatformDimension)dimension;
+            sb.append(platform.getPlatformName());
+            //new_user
+        }
+        return null;
+    }
+
+    /**
+     * 执行sql---一定是先执行查询操作，再执行插入操作
+     * @param conn
+     * @param sqls
+     * @param dimension
+     * @return
+     */
+    private int executSql(Connection conn, String[] sqls, BaseDimension dimension) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            //获取查询的sql
+            String selectSql = sqls[1];
+            ps = conn.prepareStatement(selectSql);
+            //为查询语句赋值
+            this.setArgs(dimension,ps);
+            rs = ps.executeQuery();
+            if(rs.next()){
+                //getInt参数为列的索引，获取的id在第一列
+                return rs.getInt(1);
+            }
+            //没有查询出来，就插入并返回维度的id
+            //有主键就可以使用Statement.RETURN_GENERATED_KEYS，返回自动生成的主键
+            ps = conn.prepareStatement(sqls[0], Statement.RETURN_GENERATED_KEYS);
+            //为插入语句赋值
+            this.setArgs(dimension,ps);
+            ps.executeUpdate();
+            //获取返回的主键id
+            rs = ps.getGeneratedKeys();
+            if(rs.next()){
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtil.close(null,ps,rs);
+        }
+        return -1;
+    }
+
+    /**
+     * 赋值参数
+     * @param dimension
+     * @param ps
+     */
+    private void setArgs(BaseDimension dimension, PreparedStatement ps) {
+        try {
+            //标记是第几个参数
+            int i = 0;
+            if(dimension instanceof KpiDimension){
+                KpiDimension kpi = (KpiDimension)dimension;
+                //要先++，参数从1开始计数
+                //第二个参数代表的是是参数的值
+                ps.setString(++i,kpi.getKpiName());
+            } else if(dimension instanceof DateDimension){
+                DateDimension date = (DateDimension)dimension;
+                ps.setInt(++i,date.getYear());
+                ps.setInt(++i,date.getSeason());
+                ps.setInt(++i,date.getMonth());
+                ps.setInt(++i,date.getWeek());
+                ps.setInt(++i,date.getDay());
+                ps.setString(++i,date.getType());
+                ps.setDate(++i,new Date(date.getCalendar().getTime()));
+            }  else if(dimension instanceof PlatformDimension){
+                PlatformDimension platform = (PlatformDimension)dimension;
+                ps.setString(++i,platform.getPlatformName());
+            }  else if(dimension instanceof BrowserDimension){
+                BrowserDimension browser = (BrowserDimension)dimension;
+                ps.setString(++i,browser.getBrowserName());
+                ps.setString(++i,browser.getBrowserVersion());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     //自定输出格式OutputFormat

@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * @author axiao
  * @date Create 17:45 2018/9/20 0020
- * @description:
+ * @description:  map端的输出的value类型
  */
 public class TimeOutputValue extends StatsOutpuValue{
 

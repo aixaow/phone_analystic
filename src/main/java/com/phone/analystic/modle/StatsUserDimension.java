@@ -61,8 +61,12 @@ public class StatsUserDimension extends StatsCommonDimension{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         StatsUserDimension that = (StatsUserDimension) o;
         return Objects.equals(statsCommonDimension, that.statsCommonDimension) &&
                 Objects.equals(browserDimension, that.browserDimension);
