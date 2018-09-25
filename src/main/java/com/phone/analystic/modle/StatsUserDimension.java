@@ -56,7 +56,7 @@ public class StatsUserDimension extends StatsCommonDimension{
         if(tmp != 0){
             return tmp;
         }
-        return this.browserDimension.compareTo(browserDimension);
+        return this.browserDimension.compareTo(other.getBrowserDimension());
     }
 
     @Override

@@ -37,22 +37,22 @@ public class DateDimension extends BaseDimension{
         this.type = type;
         this.calendar = calendar;
     }
+
     public DateDimension(int id, int year, int season, int month, int week, int day, String type, Date calendar) {
         this(year,season,month,week,day,type,calendar);
         this.id = id;
     }
 
-
     @Override
     public void write(DataOutput out) throws IOException {
-        out.write(id);
-        out.write(year);
-        out.write(season);
-        out.write(month);
-        out.write(week);
-        out.write(day);
-        out.writeUTF(type);
-        //date类型--获取时间戳
+        out.writeInt(this.id);
+        out.writeInt(this.year);
+        out.writeInt(this.season);
+        out.writeInt(this.month);
+        out.writeInt(this.week);
+        out.writeInt(this.day);
+        out.writeUTF(this.type);
+        //date类型
         out.writeLong(this.calendar.getTime());
     }
 
@@ -69,27 +69,23 @@ public class DateDimension extends BaseDimension{
         this.calendar.setTime(in.readLong());
     }
 
+
     /**
-     * 根据指标类型  返回DateDimension
+     *
      * @param time  时间戳，毫秒
      * @param type  指标类型
      * @return
      */
     public static DateDimension buildDate(long time,DateEnum type){
-        //获取时间戳中时间对应的年份
         int year = TimeUtil.getDateInfo(time,DateEnum.YEAR);
         Calendar calendar = Calendar.getInstance();
         //清空calendar
-        //此方法设置此Calendar的所有日历字段值和时间值（毫秒从历元至偏移量）未定义。
         calendar.clear();
-        //将该年的第一天的时间戳返回
         if(type.equals(DateEnum.YEAR)){
             calendar.setTimeInMillis(time);
             //年指标，指该年的1月1号。
             return new DateDimension(year,0,0,0,1,type.dateType,calendar.getTime());
         }
-
-
         int season = TimeUtil.getDateInfo(time,DateEnum.SEASON);
         if(type.equals(DateEnum.SEASON)){
             //季度指标，指该季度的第一个月的1号。
@@ -97,21 +93,16 @@ public class DateDimension extends BaseDimension{
             calendar.set(year,month-1,1);
             return new DateDimension(year,season,month,0,1,type.dateType,calendar.getTime());
         }
-
-
         int month = TimeUtil.getDateInfo(time,DateEnum.MONTH);
         if(type.equals(DateEnum.MONTH)){
             calendar.set(year,month-1,1);
             //月指标，指该月的1号。
             return new DateDimension(year,season,month,0,1,type.dateType,calendar.getTime());
         }
-
-        //这个写在了TimeUtil中，因为一个周有可能不在同一个月份，同一个年份。
         int week = TimeUtil.getDateInfo(time,DateEnum.WEEK);
         if(type.equals(DateEnum.WEEK)){
-            //获取该周的第一天时间戳
+            //获取该周的第一天
             long firstDayOfWeek = TimeUtil.getFirstDayOfWeek(time);
-            //根据时间戳来确定年份，季度，月份和日期
             year = TimeUtil.getDateInfo(firstDayOfWeek,DateEnum.YEAR);
             season = TimeUtil.getDateInfo(firstDayOfWeek,DateEnum.SEASON);
             month = TimeUtil.getDateInfo(firstDayOfWeek,DateEnum.MONTH);
@@ -128,11 +119,8 @@ public class DateDimension extends BaseDimension{
             //天指标，指该天。
             return new DateDimension(year,season,month,week,day,type.dateType,calendar.getTime());
         }
-
         throw  new RuntimeException("该日期类型不支持获取时间维度对象,datetype:"+type.dateType);
     }
-
-
 
     @Override
     public int compareTo(BaseDimension o) {

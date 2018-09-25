@@ -33,7 +33,7 @@ public class KpiDimension extends BaseDimension {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        out.write(id);
+        out.writeInt(id);
         out.writeUTF(kpiName);
     }
 

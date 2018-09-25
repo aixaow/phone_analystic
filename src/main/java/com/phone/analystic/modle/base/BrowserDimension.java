@@ -43,7 +43,7 @@ public class BrowserDimension extends BaseDimension {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        out.write(this.id);
+        out.writeInt(this.id);
         out.writeUTF(this.browserName);
         out.writeUTF(this.browserVersion);
     }

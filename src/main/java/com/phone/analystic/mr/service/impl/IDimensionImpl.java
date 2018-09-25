@@ -141,7 +141,7 @@ public class IDimensionImpl implements IDimension {
             sb.append(platform.getPlatformName());
             //new_user
         }
-        return null;
+        return sb != null ? sb.toString():null;
     }
 
     /**
