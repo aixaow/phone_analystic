@@ -17,10 +17,18 @@ public class CurrencyTypeDimension extends BaseDimension{
     private String currencyName;
 
 
+    public CurrencyTypeDimension() {
+
+    }
+
+    public CurrencyTypeDimension(String currencyName) {
+        this.currencyName = currencyName;
+    }
+
     @Override
     public void write(DataOutput out) throws IOException {
-        out.write(id);
-        out.writeUTF(currencyName);
+        out.write(this.id);
+        out.writeUTF(this.currencyName);
     }
 
     @Override
@@ -31,12 +39,34 @@ public class CurrencyTypeDimension extends BaseDimension{
 
     @Override
     public int compareTo(BaseDimension o) {
-        return 0;
+        if (this == o) {
+            return 0;
+        }
+        CurrencyTypeDimension other = (CurrencyTypeDimension) o;
+        int tmp = this.id - other.id;
+        if (tmp != 0) {
+            return tmp;
+        }
+        tmp = this.currencyName.compareTo(other.currencyName);
+        return tmp;
     }
 
     @Override
-    public String toString() {
-        return id + "\u0001"+currencyName;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CurrencyTypeDimension that = (CurrencyTypeDimension) o;
+
+        if (id != that.id) return false;
+        return currencyName != null ? currencyName.equals(that.currencyName) : that.currencyName == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (currencyName != null ? currencyName.hashCode() : 0);
+        return result;
     }
 
     public int getId() {

@@ -11,6 +11,11 @@ public class GlobalConstants {
      */
     public static final String RUNNING_DATE = "running_date";
 
+    /**
+     * 计算前一天的时间---单位是毫秒   24*60*60*10000
+     */
+    public static final long DAY_OF_MILLSECOND = 86400000l ;
+
     public static final String DEFAULT_VALUE = "unknown";
 
     /**

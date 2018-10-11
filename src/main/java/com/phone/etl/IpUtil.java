@@ -8,6 +8,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import static com.phone.common.GlobalConstants.DEFAULT_VALUE;
+
 /**
  * @ClassName IpUtil
  * @Author lyd
@@ -166,7 +168,6 @@ public class IpUtil extends IPSeeker {
      */
     public static class RegionInfo{
 
-        private String DEFAULT_VALUE = "unknown";
         private String country = DEFAULT_VALUE;
         private String province = DEFAULT_VALUE;
         private String city = DEFAULT_VALUE;

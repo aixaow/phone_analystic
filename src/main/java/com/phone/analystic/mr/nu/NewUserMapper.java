@@ -51,6 +51,9 @@ public class NewUserMapper extends Mapper<LongWritable,Text,StatsUserDimension,T
             //平台信息
             String platform = fields[13];
             String uuid = fields[3];
+            //浏览器信息
+            String browserName = fields[24];
+            String browserVersion = fields[25];
 
             if(StringUtils.isEmpty(serverTime) || StringUtils.isEmpty(uuid)){
                 logger.info("serverTime & uuid is null.serverTime:"+serverTime+". uuid:"+uuid);
@@ -63,6 +66,9 @@ public class NewUserMapper extends Mapper<LongWritable,Text,StatsUserDimension,T
             PlatformDimension platformDimension = PlatformDimension.getInstance(platform);
             //根据指标类型  返回DateDimension--日新增用户信息
             DateDimension dateDimension = DateDimension.buildDate(stime, DateEnum.DAY);
+            //获取浏览器对象实例
+            BrowserDimension browserDimension = BrowserDimension.getInstance(browserName,browserVersion);
+
             //获取公共维度对象实例，公共维度---时间、平台、kpi
             StatsCommonDimension statsCommonDimension = this.k.getStatsCommonDimension();
 
@@ -80,6 +86,14 @@ public class NewUserMapper extends Mapper<LongWritable,Text,StatsUserDimension,T
             //构建输出的value
             this.v.setId(uuid);
             //输出
+//            context.write(this.k,this.v);
+
+
+            //以下输出的数据用于计算浏览器模块下的新增用户（map端可以设置多个输出）
+            statsCommonDimension.setKpiDimension(browserNewUserKpi);
+            this.k.setBrowserDimension(browserDimension);
+            this.k.setStatsCommonDimension(statsCommonDimension);
+
             context.write(this.k,this.v);
 
         }

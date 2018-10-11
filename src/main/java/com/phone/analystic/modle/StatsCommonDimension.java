@@ -69,7 +69,7 @@ public class StatsCommonDimension extends StatsBaseDimension{
         if(tmp != 0){
             return tmp;
         }
-        return this.kpiDimension.compareTo(kpiDimension);
+        return this.kpiDimension.compareTo(other.kpiDimension);
     }
 
     @Override

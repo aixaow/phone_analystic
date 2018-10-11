@@ -3,12 +3,14 @@ package com.phone.analystic.mr;
 import com.phone.Util.JdbcUtil;
 import com.phone.analystic.modle.StatsBaseDimension;
 import com.phone.analystic.modle.value.reduce.OutputWritable;
+import com.phone.analystic.mr.nm.NewMemberRunner;
 import com.phone.analystic.mr.service.IDimension;
 import com.phone.analystic.mr.service.impl.IDimensionImpl;
 import com.phone.common.KpiType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -23,6 +25,7 @@ import java.util.Map;
  * @description: 将结果输出到mysql的自定义类
  */
 public class OutputToMySqlFormat extends OutputFormat<StatsBaseDimension,OutputWritable> {
+    private static final Logger logger = Logger.getLogger(NewMemberRunner.class);
     /**
      * 获取输出记录--核心方法
      *
@@ -74,7 +77,7 @@ public class OutputToMySqlFormat extends OutputFormat<StatsBaseDimension,OutputW
         }
 
         /**
-         * 写
+         * 写--执行一次reduce，执行一次write
          * @param key
          * @param value
          * @throws IOException
@@ -94,18 +97,19 @@ public class OutputToMySqlFormat extends OutputFormat<StatsBaseDimension,OutputW
                     //将新增加的ps存储到map中
                     map.put(kpi, ps);
                 }
+                //有问题
                 int count = 1;
                 this.batch.put(kpi, count);
                 count++;
 
-                //为ps赋值准备
+                //为ps赋值准备--对应的是output_writter.xml
                 String calssName = conf.get("writter_" + kpi.kpiName);
                 //com.phone.analystic.mr.nu.NewUserOutputWritter
                 //将包名+类名转换成类
                 Class<?> classz = Class.forName(calssName);
                 IOutputWritter writter = (IOutputWritter) classz.newInstance();
                 //调用IOutputWritter中的output方法
-                writter.ouput(conf, key, value, ps, iDimension);
+                writter.output(conf, key, value, ps, iDimension);
 
                 //对赋值好的ps进行执行
                 //有50个ps执行
@@ -113,7 +117,7 @@ public class OutputToMySqlFormat extends OutputFormat<StatsBaseDimension,OutputW
                     //批量执行
                     ps.executeBatch();
                     //提交批处理执行
-                    this.conn.commit();
+//                    this.conn.commit();
                     //将执行完的ps移除掉
                     batch.remove(kpi);
                 }
@@ -134,10 +138,11 @@ public class OutputToMySqlFormat extends OutputFormat<StatsBaseDimension,OutputW
                 for (Map.Entry<KpiType, PreparedStatement> en : map.entrySet()) {
                     //将剩余的ps进行执行--也就是上面的批处理完之后，数据不足50条了，上面不执行了，在这里进行处理
                     en.getValue().executeBatch();
-                    this.conn.commit();
+                    //已经设置自动提交了  这里不用再执行了 否则就会报错
+//                    this.conn.commit();
                 }
             } catch (SQLException e) {
-
+                logger.warn("close异常",e);
             } finally {
                 for (Map.Entry<KpiType, PreparedStatement> en : map.entrySet()) {
                     //关闭所有能关闭的资源

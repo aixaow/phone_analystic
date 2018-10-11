@@ -18,12 +18,12 @@ public interface IOutputWritter {
      * @param conf  配置对象 -要写一些配置文件
      * @param key  公共维度类的父类
      * @param value  封装map或者是reduce阶段的输出value的类型的顶级父类
-     * @param ps  执行sql的参数话查询对下个
+     * @param ps  执行sql的参数化查询
      * @param iDimension  根据维度获取对应的id的接口
      *
      *  要把map，reduce阶段的结果写到mysql，所以参数里面要写key、value类型对象
      *
      */
-    void ouput(Configuration conf, StatsBaseDimension key,
+    void output(Configuration conf, StatsBaseDimension key,
                StatsOutpuValue value, PreparedStatement ps, IDimension iDimension);
 }

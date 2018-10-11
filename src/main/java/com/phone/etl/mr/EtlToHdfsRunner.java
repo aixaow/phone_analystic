@@ -1,6 +1,7 @@
 package com.phone.etl.mr;
 
 import com.phone.Util.TimeUtil;
+import com.phone.etl.ip.LogUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -15,6 +16,7 @@ import org.apache.log4j.Logger;
 
 
 import java.io.IOException;
+import java.util.Map;
 
 import static com.phone.common.GlobalConstants.RUNNING_DATE;
 
@@ -45,6 +47,11 @@ public class EtlToHdfsRunner implements Tool{
         } catch (Exception e) {
             logger.warn("执行etl to hdfs异常",e);
         }
+
+        Map<String, String> stringStringMap = LogUtil.parserLog("114.61.94.253^A1537792027.397^Ahh^A/BCImg.gif?c_time=1495462088397&oid=oid121201&u_mid=Aidon&pl=java_server&en=e_cs&sdk=jdk&ver=1");
+
+        System.out.println(stringStringMap);
+
     }
 
     @Override
@@ -69,7 +76,7 @@ public class EtlToHdfsRunner implements Tool{
         job.setNumReduceTasks(0);
 
         //设置输入输出
-        this.handleInputOutpu(job);
+        this.handleInputOutput(job);
         return job.waitForCompletion(true)?1:0;
 
     }
@@ -79,8 +86,9 @@ public class EtlToHdfsRunner implements Tool{
      * 需要设置输入输出的路径--判断路径是否可用
      * @param job
      */
-    private void handleInputOutpu(Job job) {
+    private void handleInputOutput(Job job) {
         //获取存储到conf中的日期，进行切分的到月和日
+        //接受的是args传过来的参数信息
         String[] fields = job.getConfiguration().get(RUNNING_DATE).split("-");
         String month = fields[1];
         String day = fields[2];

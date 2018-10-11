@@ -40,18 +40,22 @@ public class NewUserReducer extends Reducer<StatsUserDimension,TimeOutputValue,
         //清空map--reduce是一个key对应执行一次reduce，不清空，会包含上一次reduce的执行结果，统计就会出错
         map.clear();
         //循环--去重
+//        System.out.println("------------------------------------------------------");
         for (TimeOutputValue tv: values) {
             this.unique.add(tv.getId());
+//            System.out.println(tv.getId());
         }
         //构造输出的v
-//        this.v.setKpi(KpiType.valueOfKpiName(key.getStatsCommonDimension().getKpiDimension().getKpiName()));
+        this.v.setKpi(KpiType.valueOfKpiName(key.getStatsCommonDimension().getKpiDimension().getKpiName()));
         //首先判断传过来的kpi指标名称是否是新增用户的指标名称
-        if(key.getStatsCommonDimension().getKpiDimension().getKpiName().equals(KpiType.NEW_USER.kpiName)){
-            this.v.setKpi(KpiType.NEW_USER);
-        }
+//        if(key.getStatsCommonDimension().getKpiDimension().getKpiName().equals(KpiType.NEW_USER.kpiName)){
+//            this.v.setKpi(KpiType.NEW_USER);
+//        }
         //将map的key都设置为-1，只是一个标志，代表给sql赋值的时候，知道这是新增用户的信息
         this.map.put(new IntWritable(-1),new IntWritable(this.unique.size()));
         this.v.setValue(this.map);
+        //注意这里map和set都要进行清空操作，否则上一次reduce的结果会重复计算
+        this.unique.clear();
         //输出
         context.write(key,this.v);
     }

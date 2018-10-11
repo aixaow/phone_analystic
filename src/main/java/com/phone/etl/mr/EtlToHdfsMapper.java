@@ -115,6 +115,8 @@ public class EtlToHdfsMapper extends Mapper<LongWritable,Text,LogWritable,NullWr
 
     /**
      * 此方法被MapReduce框架仅且执行一次，在执行完毕Map任务后，进行相关变量或资源的释放工作
+     *
+     * 这里是将输入的数据条数和处理后的打印，看数目对不对
      * @param context
      * @throws IOException
      * @throws InterruptedException

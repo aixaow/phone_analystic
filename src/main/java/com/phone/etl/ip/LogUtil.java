@@ -36,7 +36,7 @@ public class LogUtil {
                 //存储信息
                 map.put(Constants.LOG_IP, fields[0]);
                 map.put(Constants.LOG_SERVER_TIME, fields[1].replaceAll("\\.", ""));
-                map.put(Constants.LOG_USERAGENT, fields[3]);
+//                map.put(Constants.LOG_USERAGENT, fields[3]);  之前3条出不来
                 //参数列表，单独处理
                 String params = fields[3];
                 handleParams(params, map);
@@ -44,8 +44,6 @@ public class LogUtil {
                 handleIp(map);
                 //处理userAgent
                 handleUserAgent(map);
-
-
             }
         }
         return map;

@@ -16,8 +16,7 @@ import java.io.IOException;
  *
  * window.navigator.userAgent
  **/
-public class UserAgentUtil {
-    public static final Logger logger = Logger.getLogger(UserAgentUtil.class);
+public class UserAgentUtil {public static final Logger logger = Logger.getLogger(UserAgentUtil.class);
 
     static UASparser uaSparser = null;
 

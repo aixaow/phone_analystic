@@ -19,7 +19,7 @@ import java.sql.PreparedStatement;
  */
 public class NewUserOutputWritter implements IOutputWritter {
     @Override
-    public void ouput(Configuration conf, StatsBaseDimension key,
+    public void output(Configuration conf, StatsBaseDimension key,
                       StatsOutpuValue value, PreparedStatement ps,
                       IDimension iDimension) {
 

@@ -3,6 +3,7 @@ package com.phone.analystic.modle.base;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author axiao
@@ -21,12 +22,29 @@ public class EventDimension extends BaseDimension {
     private String action;
 
 
+    public EventDimension(){
+
+    }
+
+    public EventDimension(String category, String action) {
+        this.category = category;
+        this.action = action;
+    }
+
+    public EventDimension(int id, String category, String action) {
+        this(category,action);
+        this.id = id;
+    }
+
     @Override
     public void write(DataOutput out) throws IOException {
-        out.write(id);
-        out.writeUTF(category);
-        out.writeUTF(action);
+        out.writeInt(this.id);
+        out.writeUTF(this.category);
+        out.writeUTF(this.action);
+
     }
+
+
 
     @Override
     public void readFields(DataInput in) throws IOException {
@@ -34,14 +52,40 @@ public class EventDimension extends BaseDimension {
         this.category = in.readUTF();
         this.action = in.readUTF();
     }
+
+
     @Override
     public int compareTo(BaseDimension o) {
-        return 0;
+        if (o == this) {
+            return 0;
+        }
+        EventDimension other = (EventDimension) o;
+        int tmp = this.id - other.id;
+        if (tmp != 0) {
+            return tmp;
+        }
+        tmp = this.category.compareTo(other.category);
+        if (tmp != 0) {
+            return tmp;
+        }
+        return this.action.compareTo(other.action);
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EventDimension that = (EventDimension) o;
+        return id == that.id &&
+                Objects.equals(category, that.category) &&
+                Objects.equals(action, that.action);
     }
 
     @Override
-    public String toString() {
-        return id + "\u0001"+category+""+action;
+    public int hashCode() {
+
+        return Objects.hash(id, category, action);
     }
 
     public int getId() {

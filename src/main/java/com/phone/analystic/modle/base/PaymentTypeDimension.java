@@ -18,10 +18,19 @@ public class PaymentTypeDimension extends BaseDimension {
 
 
 
+    public PaymentTypeDimension() {
+
+    }
+
+    public PaymentTypeDimension(String paymentType) {
+        this.paymentType = paymentType;
+    }
+
+
     @Override
     public void write(DataOutput out) throws IOException {
-        out.write(id);
-        out.writeUTF(paymentType);
+        out.writeInt(this.id);
+        out.writeUTF(this.paymentType);
     }
 
     @Override
@@ -32,12 +41,34 @@ public class PaymentTypeDimension extends BaseDimension {
 
     @Override
     public int compareTo(BaseDimension o) {
-        return 0;
+        if (this == o) {
+            return 0;
+        }
+        PaymentTypeDimension other = (PaymentTypeDimension) o;
+        int tmp = this.id - other.id;
+        if (tmp != 0) {
+            return tmp;
+        }
+        tmp = this.paymentType.compareTo(other.paymentType);
+        return tmp;
     }
 
     @Override
-    public String toString() {
-        return id + "\u0001"+paymentType;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PaymentTypeDimension that = (PaymentTypeDimension) o;
+
+        if (id != that.id) return false;
+        return paymentType != null ? paymentType.equals(that.paymentType) : that.paymentType == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (paymentType != null ? paymentType.hashCode() : 0);
+        return result;
     }
 
     public int getId() {
